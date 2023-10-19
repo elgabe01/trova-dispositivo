@@ -25,8 +25,9 @@ body {
 }
 
 #text {
-  color: #000000;
+  text-shadow: -2px 0 #8e80fb, 0 2px #8e80fb, 2px 0 #8e80fb, 0 -2px #8e80fb;
   text-align: center;
+  color: #fff;
 }
 
 
@@ -59,8 +60,14 @@ input:hover {
   top: 10px;
   right: 10px;
   z-index: 999;
-  /* Imposta un valore alto per sovrapporre tutto */
+}
 
+
+.pos {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 999;
 }
 
 .Map {

@@ -1,5 +1,5 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
-import React, { useEffect, useState, View } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Icon, marker } from "leaflet";
 import { useNavigate } from "react-router-dom";
 import "../App.css"
@@ -47,6 +47,7 @@ const icon = new Icon({
 export const Mappa = () => {
     const [Markers, setMarkers] = useState([]);
     const navigate = useNavigate()
+    const mapRef = useRef();
 
 
     const navigaHome = async () => {
@@ -76,19 +77,25 @@ export const Mappa = () => {
         }
     })
 
-
-
+    
+  const centerMap = (geolocation) => {
+    if (mapRef.current) {
+      mapRef.current.setView(geolocation, 13);
+    }
+  };
+        
+    
     return (
         <body id="bodyMap">
             <div>
                 <input type="button" class="x" value={"X"} onClick={navigaHome} />
-                < MapContainer center={[48.8566, 2.3522]} zoom={13}>
+                < MapContainer ref={mapRef} id="mapp" center={[48.8566, 2.3522]} zoom={13}>
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
                     {
                         Markers.map(marker => (
-                            <Marker position={marker.geolocation} icon={icon} ><Popup><h2>{marker.ID} </h2></Popup>
+                            <Marker position={marker.geolocation} icon={icon} key={marker.ID} ><Popup><h2>{marker.ID} </h2></Popup>
                             </Marker>))
                     }
                 </MapContainer>
@@ -96,7 +103,7 @@ export const Mappa = () => {
                     Lista dispositivi attivi  ({Markers.length})
                 </h1>
                 {Markers.map((marker) => (
-                    <div id="disp">
+                    <div class="disp" onClick={() => centerMap(marker.geolocation)}>
                         <h2>
                             dispositivo:{marker.ID}
                         </h2>

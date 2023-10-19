@@ -10,7 +10,6 @@ if ('geolocation' in navigator) {
     alert("la geolocalizzazione non è supporatata");
 }
 
-
 const us = {
     clientId: 'mqttGabo_' + Math.random().toString(16).substring(2, 8),
     // username: mqtt.username,
@@ -49,19 +48,22 @@ export const Invio = () => {
     function errorCallback(error) {
         switch (error.code) {
             case error.PERMISSION_DENIED:
-                console.error('L\'utente ha negato l\'autorizzazione alla geolocalizzazione.');
+                return(<div>'L\'utente ha negato l\'autorizzazione alla geolocalizzazione.'</div>);
                 break;
             case error.POSITION_UNAVAILABLE:
-                console.error('Informazioni sulla posizione non disponibili.');
+                return(<div>'Informazioni sulla posizione non disponibili.'</div>);
                 break;
             case error.TIMEOUT:
-                console.error('Timeout durante la richiesta di geolocalizzazione.');
+                return(<div>'Timeout durante la richiesta di geolocalizzazione.'</div>);
                 break;
             case error.UNKNOWN_ERROR:
-                console.error('Errore sconosciuto durante la geolocalizzazione.');
+                return(<div>'Errore sconosciuto durante la geolocalizzazione.'</div>);
                 break;
         }
     }
+    
+navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+
     const options = {
         enableHighAccuracy: true, // Richiede dati di alta precisione (se disponibili)
         timeout: 5000,           // Timeout della richiesta (in millisecondi)
@@ -77,7 +79,7 @@ export const Invio = () => {
     const sendStop = async () => {
         const topic = "/stop"
         const objStop = {
-            IDstop: us.IDclient,
+            IDstop: IDclient,
         };
         const messageStop = JSON.stringify(objStop);
         console.log(messageStop)
@@ -91,7 +93,7 @@ export const Invio = () => {
     }
 
     const sendLoc = async () => {
-        navigator.geolocation.getCurrentPosition(successCallback, errorCallback, options);
+        navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
         const posizione = {
             ID: IDclient,
             geolocation: [latitude, longitude],
@@ -113,7 +115,7 @@ export const Invio = () => {
         let intervalId;
 
         if (isSending) {
-
+            sendLoc();
             intervalId = setInterval(() => {
                 sendLoc();
             }, 3000); // Invia un messaggio ogni secondo
@@ -138,12 +140,14 @@ export const Invio = () => {
                 <div>
                     <input type="button" class="x" value={"X"} onClick={navigaHome} />
                 </div>
-
+                <div class="pos">
+                  <h1 id="text">  position:{latitude}, {longitude}</h1>
+                </div>
                 <div class="center-container">
                     <input type="button" id="messaggio" value={isSending ? "smetti di inviare dati" : "invia"} onClick={toggleSending} />
-                    
-                        <h1 id="text">il tuo dispositivo è ID: {IDclient}</h1>
-                    
+
+                    <h1 id="text">il tuo dispositivo è ID: {IDclient}</h1>
+
                 </div>
 
             </div>
