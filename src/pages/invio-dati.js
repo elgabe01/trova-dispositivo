@@ -48,22 +48,20 @@ export const Invio = () => {
     function errorCallback(error) {
         switch (error.code) {
             case error.PERMISSION_DENIED:
-                return(<div>'L\'utente ha negato l\'autorizzazione alla geolocalizzazione.'</div>);
+                alert('L\'utente ha negato l\'autorizzazione alla geolocalizzazione.');
                 break;
             case error.POSITION_UNAVAILABLE:
-                return(<div>'Informazioni sulla posizione non disponibili.'</div>);
+                alert('Informazioni sulla posizione non disponibili.');
                 break;
             case error.TIMEOUT:
-                return(<div>'Timeout durante la richiesta di geolocalizzazione.'</div>);
+                alert('Timeout durante la richiesta di geolocalizzazione.');
                 break;
             case error.UNKNOWN_ERROR:
-                return(<div>'Errore sconosciuto durante la geolocalizzazione.'</div>);
+                alert('Errore sconosciuto durante la geolocalizzazione.');
                 break;
         }
     }
     
-navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
-
     const options = {
         enableHighAccuracy: true, // Richiede dati di alta precisione (se disponibili)
         timeout: 5000,           // Timeout della richiesta (in millisecondi)
@@ -113,6 +111,7 @@ navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
 
     useEffect(() => {
         let intervalId;
+        navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
 
         if (isSending) {
             sendLoc();
