@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 const mqtt = require('mqtt/dist/mqtt');
 
 
@@ -39,7 +38,8 @@ export const Invio = () => {
     const [longitude, setLongitude] = useState("");
     const [latitude, setLatitude] = useState("");
     const [isSending, setIsSending] = useState(false);
-
+    const latRef = useRef();
+    const lonRef = useRef();
     function successCallback(position) {
         setLatitude(position.coords.latitude);
         setLongitude(position.coords.longitude);
@@ -48,20 +48,19 @@ export const Invio = () => {
     function errorCallback(error) {
         switch (error.code) {
             case error.PERMISSION_DENIED:
-                alert('L\'utente ha negato l\'autorizzazione alla geolocalizzazione.');
+                return (<div>'L\'utente ha negato l\'autorizzazione alla geolocalizzazione.'</div>);
                 break;
             case error.POSITION_UNAVAILABLE:
-                alert('Informazioni sulla posizione non disponibili.');
+                return (<div>'Informazioni sulla posizione non disponibili.'</div>);
                 break;
             case error.TIMEOUT:
-                alert('Timeout durante la richiesta di geolocalizzazione.');
+                return (<div>'Timeout durante la richiesta di geolocalizzazione.'</div>);
                 break;
             case error.UNKNOWN_ERROR:
-                alert('Errore sconosciuto durante la geolocalizzazione.');
+                return (<div>'Errore sconosciuto durante la geolocalizzazione.'</div>);
                 break;
         }
     }
-    
     const options = {
         enableHighAccuracy: true, // Richiede dati di alta precisione (se disponibili)
         timeout: 5000,           // Timeout della richiesta (in millisecondi)
@@ -91,7 +90,6 @@ export const Invio = () => {
     }
 
     const sendLoc = async () => {
-        navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
         const posizione = {
             ID: IDclient,
             geolocation: [latitude, longitude],
@@ -108,16 +106,18 @@ export const Invio = () => {
             }
         });
     }
-
+    
     useEffect(() => {
         let intervalId;
-        navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
 
         if (isSending) {
+            navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
             sendLoc();
+
             intervalId = setInterval(() => {
+                navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
                 sendLoc();
-            }, 3000); // Invia un messaggio ogni secondo
+            }, 3000); // Invia un messaggio ogni 3 secondi
         }
 
         // Pulizia dell'intervallo quando il componente viene smontato o il pulsante viene premuto nuovamente
@@ -130,8 +130,22 @@ export const Invio = () => {
     }, [isSending]);
 
     const toggleSending = () => {
-        setIsSending((prevIsSending) => !prevIsSending);
+            setIsSending((prevIsSending) => !prevIsSending);
     };
+    const inviaManuale = () => {
+        if (isSending) {
+            alert("impossibile inviare manualmente! smetti di inviare automaticamente")
+        } else if(lonRef.value !== "" && latRef.value !== "")
+        {
+            setLatitude(latRef.current.value);
+            setLongitude(lonRef.current.value);
+            sendLoc();
+        } else if(lonRef.value === "" || latRef.value === "")
+        {
+            alert("uno dei due campi è vuoto, riempilo!")
+        }
+    }
+
 
     return (
         <body id="home">
@@ -140,15 +154,18 @@ export const Invio = () => {
                     <input type="button" class="x" value={"X"} onClick={navigaHome} />
                 </div>
                 <div class="pos">
-                  <h1 id="text">  position:{latitude}, {longitude}</h1>
+                    <h1 id="text">  position:{latitude}, {longitude}</h1>
                 </div>
                 <div class="center-container">
                     <input type="button" id="messaggio" value={isSending ? "smetti di inviare dati" : "invia"} onClick={toggleSending} />
 
                     <h1 id="text">il tuo dispositivo è ID: {IDclient}</h1>
+                    <input type="number" ref={latRef} name="textLatitudine" placeholder="latitudine" />
+                    <input type="number" ref={lonRef} name="textLongitudine" placeholder="longitudine" />
+                    <input type="button" value={"invia manualmente"} onClick={inviaManuale} />
 
                 </div>
-
+              
             </div>
         </body>
     );
